@@ -1,0 +1,4 @@
+[submodule "swtor-logparser"]
+	path = swtor-logparser
+	url = git@github.com:pjmagee/swtor-logparser.git
+	branch = main

@@ -1,0 +1,24 @@
+﻿@using SwtorLogParser.Monitor
+@page "/combatlogs"
+@inject CombatLogs CombatLogs
+
+<FluentDataGrid Items="CombatLogs.EnumerateCombatLogs().AsQueryable()" ResizableColumns=true Pagination="@_pagination">
+    <PropertyColumn Property="@(c => c.FileInfo.Name)" />
+    <PropertyColumn Property="@(c => c.FileInfo.LastWriteTimeUtc)" />
+       <TemplateColumn Title="Delete">
+            <FluentButton Appearance="Appearance.Accent" @onclick="@(() => context.FileInfo.Delete())">Delete</FluentButton>
+        </TemplateColumn>
+</FluentDataGrid>
+
+<FluentPaginator State="@_pagination" />
+
+@code {
+    
+    readonly PaginationState _pagination = new() { ItemsPerPage = 20 };
+
+    protected override Task OnInitializedAsync()
+    {
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+}

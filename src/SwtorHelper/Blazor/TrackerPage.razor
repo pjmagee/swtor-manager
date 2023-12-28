@@ -1,0 +1,53 @@
+﻿@page "/tracker"
+@using SwtorHelper.Domain.Tracker
+@using SwtorHelper.Data
+@using SwtorLogParser.Model
+@inject CharacterTracker CharacterTracker
+
+<FluentButton @onclick="Refresh">
+    Refresh
+</FluentButton>
+
+<FluentTabs ActiveTabId="@activeId" Orientation="Orientation.Vertical">
+     
+    @foreach (var key  in CharacterTracker.CharacterLocationEvents.Keys)
+    {
+        if (CharacterTracker.CharacterLocationEvents.TryGetValue(key, out var items))
+        {
+            var title = $"{key} ({items.Count})";
+
+            <FluentTab Label=@title>
+                @if (items.Count > 0)
+                {
+                    <FluentDataGrid Pagination="@_paginationStates[key]" id="manualGrid" Items="items.Values.AsQueryable()" GenerateHeader=GenerateHeaderOption.None GridTemplateColumns="0.33fr 0.33fr">
+                        <PropertyColumn Align="Align.Center" Property="@(c => c.Timestamp)"/>
+                        <PropertyColumn Align="Align.Center" Property="@(c => c.Action)"/>
+                    </FluentDataGrid>
+                    <FluentPaginator State="@_paginationStates[key]"/>
+                }
+            </FluentTab>
+        }
+    }
+    
+</FluentTabs>
+
+@code {
+    
+    string? activeId = "tab-1";
+
+    private readonly Dictionary<CharacterName, PaginationState> _paginationStates = new Dictionary<CharacterName, PaginationState>();
+
+    protected override void OnInitialized()
+    { 
+        foreach (var character in SettingsManager.EnumerateCharacters())
+        {
+            _paginationStates.Add(character.Name, new PaginationState(){ ItemsPerPage = 20} );
+        }
+    }
+    
+    private async Task Refresh()
+    {
+        CharacterTracker.Refresh();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,49 @@
+﻿@using SwtorHelper.Data
+@page "/profiles"
+
+<FluentTabs ActiveTabId="@activeId" OnTabChange="HandleTabChange" Orientation="Orientation.Vertical">
+    @foreach (var profile in profiles)
+    {
+        <FluentTab Label=@profile.File.Name>
+            <FluentTreeView>
+                @foreach (var item in profile.XDocument.Root.Elements())
+                {
+                    <FluentTreeItem Text=@(item.Name.LocalName)>
+                        @foreach(var element in item.Elements())
+                        {
+                            <FluentTreeItem Text=@(element.Name.LocalName) Expanded=false>
+                                @foreach(var attr in element.Attributes())
+                                {
+                                    <FluentTreeItem Text=@(attr.Name.LocalName) Expanded=false>
+                                        @attr.Value
+                                    </FluentTreeItem>
+                                }
+                            </FluentTreeItem>
+                        }                            
+                    </FluentTreeItem>
+                }
+            </FluentTreeView>
+        </FluentTab>
+    }
+</FluentTabs>
+
+@code {
+
+    private GuiProfile[] profiles;
+
+    string? activeId = "tab-1";
+    FluentTab? fluentTab;
+
+    protected override Task OnInitializedAsync()
+    {
+        profiles = GuiManager.EnumerateGuiProfiles().ToArray();
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void HandleTabChange(FluentTab fluentTab)
+    {
+        this.fluentTab = fluentTab;
+    }
+
+}

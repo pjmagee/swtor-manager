@@ -4,7 +4,7 @@ namespace SwtorHelper.Domain.Tracker;
 
 public struct CharacterLocationEvent
 {
-    public GameObject Event { get; set; }
+    public LineAction Action { get; set; }
     public DateTime Timestamp { get; set; }
 
     public CharacterLocationEvent(CombatLogLine line)
@@ -13,6 +13,6 @@ public struct CharacterLocationEvent
         ArgumentNullException.ThrowIfNull(line.Action, nameof(line.Action));
         
         Timestamp = line.TimeStamp;
-        Event = line.Action.Event;
+        Action = line.Action;
     }
 }

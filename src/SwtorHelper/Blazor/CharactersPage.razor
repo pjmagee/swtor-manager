@@ -1,0 +1,52 @@
+﻿@page "/"
+
+@using SwtorHelper.Data
+@inject SettingsManager SettingsManager
+@inject SettingsApplier SettingsApplier
+
+@if (_characters == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <FluentTabs Orientation="Orientation.Vertical">
+        @foreach (var character in _characters)
+        {
+            <FluentTab Label="@character.Name">
+                  <FluentDataGrid id="manualGrid" GenerateHeader=GenerateHeaderOption.None GridTemplateColumns="1fr 1fr 1fr" TGridItem="KeyValuePair<string, string>" role="grid">
+                                    <FluentDataGridRow RowType="DataGridRowType.Header">
+                                        <FluentDataGridCell GridColumn=1 CellType="DataGridCellType.ColumnHeader">Key</FluentDataGridCell>
+                                        <FluentDataGridCell GridColumn=2 CellType="DataGridCellType.ColumnHeader">Value</FluentDataGridCell>
+                                        <FluentDataGridCell GridColumn=3 CellType="DataGridCellType.ColumnHeader">Apply setting to others</FluentDataGridCell>
+                                    </FluentDataGridRow>
+                                    @foreach(var item in @character.CharacterSettings.Settings)
+                                    {
+                                        <FluentDataGridRow>
+                                            <FluentDataGridCell GridColumn=1 Style="width: 300px">@item.Key</FluentDataGridCell>
+                                            <FluentDataGridCell GridColumn=2 Style="">@item.Value</FluentDataGridCell>
+                                            <FluentDataGridCell GridColumn=3 Style="">
+                                                <FluentButton @onclick="@(() => SettingsApplier.ApplyAsync(item.Key, item.Value))">
+                                                    Apply to all characters
+                                                </FluentButton>
+                                            </FluentDataGridCell>
+                                        </FluentDataGridRow>
+                                    }
+                                </FluentDataGrid>
+            </FluentTab>
+        }
+    </FluentTabs>
+} 
+
+@code {
+
+    private Character[]? _characters;
+
+    protected override void OnInitialized()
+    {
+        _characters = SettingsManager.EnumerateCharacters().ToArray();
+        StateHasChanged();
+    }
+}

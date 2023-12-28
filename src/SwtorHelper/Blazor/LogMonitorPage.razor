@@ -1,0 +1,57 @@
+﻿@page "/logmonitor"
+@using SwtorLogParser.Model
+@using SwtorLogParser.Monitor
+@using SwtorHelper.Widgets
+
+
+<FluentStack>
+    <FluentCard>
+        Latest Write: @combatLog?.FileInfo.LastWriteTime <br /> 
+        Latest File: @combatLog?.FileInfo.Name
+    </FluentCard>
+    <FluentDataGrid Items="LogLines" ResizableColumns=true Pagination="@_pagination">
+        <PropertyColumn Property="@(c => c.TimeStamp)" />
+        <PropertyColumn Property="@(c => c.Source)" Format="Basic" />
+        <PropertyColumn Property="@(c => c.Target)" Format="Basic" />
+        <PropertyColumn Property="@(c => c.Ability)" />
+        <PropertyColumn Property="@(c => c.Action)" Format="Basic"  />
+    </FluentDataGrid>
+    <FluentPaginator State="@_pagination" />
+</FluentStack>
+
+<FluentButton @onclick="Open">
+    Open Widget
+</FluentButton>
+
+@code 
+{
+    [Inject]
+    public CombatLogs CombatLogs { get; set; }
+    
+    private CombatLog? combatLog => CombatLogs.GetLatestCombatLog();  
+    
+    readonly PaginationState _pagination = new() { ItemsPerPage = 20 };
+
+    private IQueryable<CombatLogLine> LogLines => combatLog is null ? new EnumerableQuery<CombatLogLine>(Enumerable.Empty<CombatLogLine>()) : combatLog.GetLogLines().AsQueryable().Reverse();
+
+    protected override Task OnInitializedAsync()
+    {
+        _pagination.TotalItemCountChanged += (sender, eventArgs) =>
+        {
+            StateHasChanged();
+        };
+        
+        return base.OnInitializedAsync();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {        
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void Open(MouseEventArgs obj)
+    {
+        Application.Current.OpenWindow(new Window(new DpsHpsWidget()));
+    }
+}
+
